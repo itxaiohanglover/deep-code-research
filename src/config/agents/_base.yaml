@@ -1,0 +1,121 @@
+# ============================================================
+# DeepCode Research - Agent 基础配置
+# ============================================================
+# 所有 Agent 共享的配置模板
+# Agent 通过覆盖 features 来启用/禁用功能
+#
+# 功能矩阵：
+# ┌────────────────┬─────┬────────┬────────┬─────────┐
+# │ Agent          │ RAG │ Search │ Memory │ Callbacks│
+# ├────────────────┼─────┼────────┼────────┼─────────┤
+# │ requirements   │ ✓   │ ✓      │ ✓      │ ✓       │ ← RAG 用于检索用户上传的文档
+# │ tech_research  │ ✗   │ ✓      │ ✓      │ ✓       │ ← 主要靠搜索获取最新技术信息
+# │ architecture   │ ✗   │ ✗      │ ✓      │ ✓       │ ← 基于前序产物设计
+# │ risk           │ ✗   │ ✗      │ ✓      │ ✓       │ ← 基于前序产物评估
+# │ spec_gen       │ ✗   │ ✗      │ ✓      │ memory  │ ← 基于前序产物生成
+# │ evolution      │ ✗   │ ✗      │ ✓      │ ✓       │ ← 基于前序产物验证
+# │ planning       │ ✗   │ ✗      │ ✓      │ ✓       │ ← 基于 Spec Kit 规划
+# │ coding         │ ✗   │ ✗      │ ✓      │ ✓       │ ← 基于规划生成代码
+# │ testing        │ ✗   │ ✗      │ ✓      │ ✓       │ ← 执行测试
+# │ reflecting     │ ✗   │ ✗      │ ✓      │ ✓       │ ← 分析测试结果
+# │ summary        │ ✗   │ ✗      │ ✓      │ ✓       │ ← 生成技能文档
+# └────────────────┴─────┴────────┴────────┴─────────┘
+#
+# RAG 设计原则：
+# - 只有 requirements 启用 RAG（用于检索用户上传的参考文档）
+# - 其他 Agent 通过 ARTIFACT_DEPENDENCIES 获取前序产物，不需要 RAG
+# - 需要最新信息的 Agent 使用 Web 搜索
+# ============================================================
+
+handler: config/config_handler
+
+# ============================================================
+# LLM 配置
+# ============================================================
+llm:
+  service: ${oc.env:LLM_SERVICE,modelscope}
+  model: ${oc.env:LLM_MODEL, ZhipuAI/GLM-4.7}
+  modelscope_api_key: ${oc.env:MODELSCOPE_API_KEY}
+  modelscope_base_url: ${oc.env:MODELSCOPE_BASE_URL}
+
+# 注意：数值类型必须直接写，不能用环境变量（会被解析为字符串）
+# max_tokens 范围：1-131072（API 限制）
+generation_config:
+  temperature: 0.4
+  max_tokens: 131072
+  stream: false
+
+# ============================================================
+# 功能开关（Agent 可覆盖）
+# ============================================================
+features:
+  rag: false        # RAG 检索增强，默认关闭，需要的 Agent 显式启用
+  search: false     # Web 搜索工具，默认关闭
+  memory: true      # Memory 上下文记忆，默认开启
+  callbacks: true   # Artifact + Memory 回调，默认开启
+
+# ============================================================
+# Memory 配置（features.memory=true 时生效）
+# ============================================================
+memory:
+  - name: deepcode_memory
+    summary_model: Qwen/Qwen3-8B
+    max_tokens: 8192
+
+# ============================================================
+# RAG 配置模板（features.rag=true 时生效）
+# ============================================================
+# Agent 可以覆盖 knowledge_sources.persistent.paths 自定义知识库路径
+# 注意：数值类型必须直接写，不能用环境变量（会被解析为字符串导致类型错误）
+rag:
+  name: LlamaIndexRAG
+  embedding: iic/nlp_gte_sentence-embedding_chinese-base
+  chunk_size: 512
+  chunk_overlap: 50
+  retrieve_only: true
+  use_rerank: true
+  use_expansion: false
+  storage_dir: ${oc.env:OUTPUT_DIR}/rag_index
+  
+  knowledge_sources:
+    uploads:
+      enabled: true
+    persistent:
+      enabled: true
+      base_path: ${oc.env:OUTPUT_DIR}/knowledge_base
+      paths:
+        - tech_patterns
+        - best_practices
+        - domain_knowledge
+
+# ============================================================
+# Callbacks 配置
+# ============================================================
+# 注意：OmegaConf.merge 可能不会正确继承此配置
+# 因此每个 Agent 配置文件需要显式声明 callbacks
+# 这是 _base.yaml 的默认值，供参考
+callbacks:
+  - callbacks/artifact_callback
+  - callbacks/memory_callback
+
+# ============================================================
+# Agent 默认参数
+# ============================================================
+# 注意：数值类型必须直接写，不能用环境变量
+max_chat_round: 15
+tool_call_timeout: 30000
+
+# ============================================================
+# 缓存配置
+# ============================================================
+# 环境变量:
+#   LLM_CACHE_ENABLED=true/false  - LLM 缓存开关（默认 true）
+#   LLM_CACHE_TTL_SECONDS=3600    - 缓存过期时间（默认 1 小时）
+
+# ============================================================
+# 工作流配置
+# ============================================================
+# 环境变量:
+#   PARALLEL_ANALYSIS=true/false      - 并行执行开关（默认 true）
+#   INCREMENTAL_EXECUTION=true/false  - 增量执行开关（默认 true）
+#   FORCE_AGENTS=agent1,agent2        - 强制执行的 Agent 列表

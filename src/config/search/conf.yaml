@@ -1,0 +1,26 @@
+# ============================================================
+# 搜索引擎配置
+# ============================================================
+# 支持的搜索引擎：EXA, SERPAPI
+
+# SEARCH_ENGINE:
+#   engine: exa
+#   exa_api_key: ${oc.env:EXA_API_KEY}
+  
+#   # 搜索结果压缩器配置
+#   # 使用小模型提取关键信息，减少上下文长度
+#   compressor:
+#     enabled: true
+#     model: Qwen/Qwen3-8B
+#     max_tokens: 512
+    # api_key 和 base_url 默认使用 MODELSCOPE_API_KEY 和 MODELSCOPE_BASE_URL
+
+# SERPAPI 配置（备选）
+SEARCH_ENGINE:
+  engine: serpapi
+  serpapi_api_key: ${oc.env:SERPAPI_API_KEY}
+  provider: google
+  compressor:
+    enabled: true
+    model: Qwen/Qwen3-8B
+    max_tokens: 512

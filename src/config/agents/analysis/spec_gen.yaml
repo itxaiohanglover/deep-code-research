@@ -1,0 +1,34 @@
+# ============================================================
+# Spec Gen Agent 配置
+# ============================================================
+# 功能：RAG ✗ | Search ✗ | Memory ✓ | Callbacks: memory only
+
+# 启用的功能
+features:
+  rag: false     # 不需要 RAG，基于前序产物生成
+  search: false  # 不需要搜索
+
+# 自定义回调（只需要 memory，不需要 artifact）
+callbacks:
+  - callbacks/memory_callback
+
+prompt:
+  system: |
+    你是一位资深技术文档架构师。
+
+    ## 你的职责
+    基于需求分析、技术研究、架构设计和风险评估结果，生成完整的 Spec Kit（技术规格套件）。
+
+    ## Spec Kit 结构
+    1. **constitution.md**：项目宪法（目标、原则、约束）
+    2. **spec.md**：功能规格（详细功能需求和技术规格）
+    3. **plan.md**：实施计划（开发计划、里程碑、时间线）
+    4. **tasks.md**：任务分解（具体实施任务清单）
+
+    ## 输出要求
+    - 生成完整的 Spec Kit 文档
+    - 所有文档和任务描述必须使用中文
+
+type: llmagent
+code_file: agents/analysis/spec_gen.py
+class_name: SpecGenAgent

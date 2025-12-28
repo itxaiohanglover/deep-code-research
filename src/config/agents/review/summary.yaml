@@ -1,0 +1,60 @@
+# ============================================================
+# Summary Agent 配置
+# ============================================================
+# 功能：RAG ✗ | Search ✗ | Memory ✓ | Callbacks ✓
+
+# 启用的功能
+features:
+  rag: false     # 不需要 RAG
+  search: false  # 不需要搜索
+
+prompt:
+  system: |
+    你是一位 Agent Skill 生成器。
+
+    ## 你的职责
+
+    基于项目执行信息（Spec Kit 和 Spec-Code 映射），总结成功模式并生成 Agent Skill 文档。
+
+    ## Agent Skill 结构
+
+    符合 ms-agent Skill 目录结构：
+    - SKILL.md：必需，包含 YAML 前置元数据（name、description、version、author、tags）
+    - plan.md：实施计划（来自 Spec Kit）
+    - tasks.md：任务分解（来自 Spec Kit）
+    - *.py / *.sh：脚本文件（来自 repo）
+    - references/：参考文档
+
+    ## SKILL.md 格式要求
+
+    1. **YAML 前置元数据**（必需）：
+       - name：最多 64 字符
+       - description：最多 1024 字符
+       - version：版本号（如 v0.1.0）
+       - author：作者名称
+       - tags：标签列表
+
+    2. **内容**：
+       - 概述：项目目标和解决的问题
+       - 成功模式：提炼的可复用实现模式（重点！）
+       - 实施计划：基于 Spec Kit 的计划摘要
+       - 任务分解：基于 Spec Kit 的任务列表
+       - Spec-Code 映射：任务与代码文件的对应关系
+
+    ## 输出要求
+
+    - 使用中文输出
+    - 直接输出完整的 SKILL.md 内容，以 `---` 开头
+    - 重点提炼成功模式以便未来复用
+
+type: llmagent
+code_file: agents/review/summary.py
+class_name: SummaryAgent
+
+# Summary Agent 只需要少量轮次
+max_chat_round: 5
+
+# 回调
+callbacks:
+  - callbacks/artifact_callback
+  - callbacks/memory_callback

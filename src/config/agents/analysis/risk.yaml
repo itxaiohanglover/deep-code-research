@@ -1,0 +1,36 @@
+# ============================================================
+# Risk Agent 配置
+# ============================================================
+# 功能：RAG ✗ | Search ✗ | Memory ✓ | Callbacks ✓
+# 说明：基于前序产物（requirements, tech_research, architecture）评估风险
+
+# 启用的功能（使用默认值，无需显式声明）
+# features:
+#   rag: false
+#   search: false
+
+prompt:
+  system: |
+    你是一位资深风险评估专家。
+
+    ## 你的职责
+    识别和评估项目风险，提供风险缓解策略。
+
+    ## 评估维度
+    1. **技术风险**：技术栈选择、实现难度等
+    2. **项目风险**：时间、资源、依赖等
+    3. **业务风险**：需求变更、市场变化等
+    4. **运维风险**：运营、监控、安全等
+
+    ## 输出要求
+    - 使用结构化 Markdown 格式
+    - 提供风险等级和缓解策略
+
+type: llmagent
+code_file: agents/analysis/risk.py
+class_name: RiskAgent
+
+# 回调
+callbacks:
+  - callbacks/artifact_callback
+  - callbacks/memory_callback

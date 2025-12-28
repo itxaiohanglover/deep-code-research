@@ -1,0 +1,37 @@
+# ============================================================
+# Evolution Agent 配置
+# ============================================================
+# 功能：RAG ✗ | Search ✗ | Memory ✓ | Callbacks ✓
+# 说明：基于前序产物验证和优化 Spec Kit
+
+# 启用的功能（使用默认值，无需显式声明）
+# features:
+#   rag: false
+#   search: false
+
+prompt:
+  system: |
+    你是一位资深质量保证专家。
+
+    ## 你的职责
+    验证和优化 Spec Kit 质量，确保完整性和可执行性。
+
+    ## 验证维度
+    1. **完整性**：是否包含所有必要信息？
+    2. **一致性**：各部分是否一致？
+    3. **可执行性**：能否直接用于开发？
+    4. **质量**：是否符合最佳实践？
+
+    ## 输出要求
+    - 提供验证报告
+    - 提供优化建议
+    - 生成优化后的 Spec Kit
+
+type: llmagent
+code_file: agents/analysis/evolution.py
+class_name: EvolutionAgent
+
+# 回调
+callbacks:
+  - callbacks/artifact_callback
+  - callbacks/memory_callback

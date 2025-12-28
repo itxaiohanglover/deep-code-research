@@ -1,0 +1,73 @@
+# DeepCodeResearch 工作流配置
+# 参考 singularity_cinema 的 workflow.yaml 格式
+
+# ============================================================
+# 工作流模式配置（通过环境变量 WORKFLOW_MODE 选择）
+# ============================================================
+# full: 完整模式 - 执行所有 11 个 Agent（默认）
+#   requirements → tech_research → architecture → risk → spec_gen 
+#   → evolution → planning → coding → testing → reflecting → summary
+#
+# fast: 快速模式 - 只执行核心 Agent（推荐，预计提速 20-50%）
+#   requirements → architecture → spec_gen → planning → coding
+#
+# minimal: 最小模式 - 只执行最核心的 Agent
+#   requirements → spec_gen → planning → coding
+#
+# 使用方式：
+#   export WORKFLOW_MODE=fast  # 设置为快速模式
+# ============================================================
+
+requirements:
+  next:
+    - tech_research
+  agent_config: agents/analysis/requirements.yaml
+
+tech_research:
+  next:
+    - architecture
+  agent_config: agents/analysis/tech_research.yaml
+
+architecture:
+  next:
+    - risk
+  agent_config: agents/analysis/architecture.yaml
+
+risk:
+  next:
+    - spec_gen
+  agent_config: agents/analysis/risk.yaml
+
+spec_gen:
+  next:
+    - evolution
+  agent_config: agents/analysis/spec_gen.yaml
+
+evolution:
+  next:
+    - planning
+  agent_config: agents/analysis/evolution.yaml
+
+planning:
+  next:
+    - coding
+  agent_config: agents/generate/planning.yaml
+
+coding:
+  next:
+    - testing
+  agent_config: agents/generate/coding.yaml
+
+testing:
+  next:
+    - reflecting
+  agent_config: agents/generate/testing.yaml
+
+reflecting:
+  next:
+    - summary
+  agent_config: agents/review/reflecting.yaml
+
+summary:
+  agent_config: agents/review/summary.yaml
+
